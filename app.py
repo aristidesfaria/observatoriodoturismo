@@ -2,69 +2,105 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# Configuração da Página
-st.set_page_config(page_title="Coleta de Dados RITS-SP", layout="wide")
+# --- CONFIGURAÇÃO E ESTILO ---
+st.set_page_config(page_title="Turismo Intelligence SaaS", layout="wide")
 
-# Título e Cabeçalho Institucional
-st.title("📊 Portal de Monitoramento do Turismo - Regional SP")
-st.subheader("Rede de Inteligência do Turismo Sustentável (RITS-SP)")
-st.markdown("---")
+# Simulação de BLOCO 1: Multi-tenancy & Planos
+if "igr_slug" not in st.query_params:
+    st.query_params["igr_slug"] = "circuito-das-frutas"
 
-# --- SEÇÃO 1: IDENTIFICAÇÃO ---
-with st.expander("📝 Seção 1: Identificação da IGR e Responsável", expanded=True):
+current_tenant = st.query_params["igr_slug"]
+plano_ativo = "Premium"  # Simulação de Bloco 1
+
+# --- SIDEBAR: CONTROLE E AUDITORIA (BLOCO 7) ---
+with st.sidebar:
+    st.image("https://www.turismo.sp.gov.br/ciet/logo.png", width=150)
+    st.title(f"IGR: {current_tenant.replace('-', ' ').title()}")
+    st.info(f"Plano: {plano_ativo}")
+    st.write("**Status de Coleta (Calendário):**")
+    st.success("Jan/2026: Concluído")
+    st.warning("Fev/2026: Em Coleta")
+    st.markdown("---")
+    st.caption(f"Log LGPD: Usuário 'Tide' autenticado às {datetime.now().strftime('%H:%M')}")
+
+# --- DASHBOARD PRINCIPAL ---
+st.title("🚀 Sistema de Inteligência Turística Regional")
+tabs = st.tabs(["Econômico", "Ambiental", "Sociocultural", "Governança", "Demanda", "Configurações"])
+
+# --- BLOCO 2: EIXO ECONÔMICO ---
+with tabs[0]:
+    st.header("💰 Desempenho Econômico")
     col1, col2 = st.columns(2)
+    
     with col1:
-        igr_nome = st.selectbox("Selecione a IGR:", ["Circuito das Frutas", "Litoral Norte", "Pérola do Mantiqueira", "Entre Serras e Águas", "Outros"])
-        municipio = st.text_input("Município de Referência:")
+        st.subheader("Hospedagem (Inventário & Ocupação)")
+        # Cadastro de Meios (Bloco 2)
+        tipo = st.selectbox("Tipo (SBClass):", ["Hotel", "Resort", "Pousada", "Flat", "Outros"]) [cite: 481]
+        uhs = st.number_input("Nº de UHs (Capacidade):", min_value=1) [cite: 500]
+        # Dados Mensais
+        taxa_ocp = st.slider("Taxa de Ocupação Mensal (%):", 0, 100, 55) [cite: 505]
+        revpar = st.number_input("RevPAR Calculado (R$):", help="Receita por Quarto Disponível") [cite: 510, 511]
+
     with col2:
-        responsavel = st.text_input("Nome do Responsável:")
-        email = st.text_input("E-mail Institucional:")
+        st.subheader("Transporte e Empregos")
+        pax_rod = st.number_input("Pax Rodoviário (Regular + Fretamento):", min_value=0) [cite: 534, 574]
+        # Monitoramento por CNAE (Bloco 2)
+        st.write("**Mercado de Trabalho (Novo CAGED)**") [cite: 599, 630]
+        admissoes = st.number_input("Admissões (ACTs):", min_value=0)
+        desligamentos = st.number_input("Desligamentos (ACTs):", min_value=0)
+        st.metric("Saldo de Empregos", admissoes - desligamentos) [cite: 630]
 
-# --- SEÇÃO 2: INDICADORES ECONÔMICOS ---
-with st.expander("💰 Seção 2: Desempenho Econômico (Mensal)"):
-    st.info("Consolide os dados coletados junto aos meios de hospedagem e bases oficiais.")
-    c1, c2, c3 = st.columns(3)
+# --- BLOCO 3: EIXO AMBIENTAL ---
+with tabs[1]:
+    st.header("🌿 Sustentabilidade Ambiental")
+    c1, c2 = st.columns(2)
     with c1:
-        st.write("**Hospedagem (Dados Primários)**")
-        uhs = st.number_input("Nº de UHs Disponíveis:", min_value=0)
-        diarias = st.number_input("Total de Diárias Vendidas:", min_value=0)
-        hospedes = st.number_input("Total de Hóspedes no Mês:", min_value=0)
+        energia = st.number_input("Consumo de Energia (kWh):", help="Dados da Concessionária") [cite: 693, 694]
+        agua = st.number_input("Consumo de Água (m³):", help="Dados Sabesp/Local") [cite: 716, 717]
     with c2:
-        st.write("**Fluxo (Dados Secundários)**")
-        rodoviario = st.number_input("Desembarques Rodoviários:", min_value=0)
-        aereo = st.number_input("Desembarques Aeroportos (se houver):", min_value=0)
-        fretamento = st.number_input("Passageiros Fretamento (ANTT):", min_value=0)
-    with c3:
-        st.write("**Mercado de Trabalho (Novo CAGED)**")
-        estoque = st.number_input("Estoque de Empregos ACTs:", min_value=0)
-        saldo = st.number_input("Saldo de Empregos (Admissões - Desligamentos):")
+        residuos = st.number_input("Volume Resíduos Sólidos (kg):") [cite: 767]
+        iqa = st.select_slider("Qualidade da Água (IQA/CETESB):", options=[1,2,3,4,5]) [cite: 742, 750]
 
-# --- SEÇÃO 3: SUSTENTABILIDADE AMBIENTAL ---
-with st.expander("🌿 Seção 3: Indicadores Ambientais (Semestral)"):
-    col_a, col_b = st.columns(2)
-    with col_a:
-        energia = st.number_input("Consumo Energia Comercial (kWh):", min_value=0.0)
-        agua = st.number_input("Consumo Água Comercial (m³):", min_value=0.0)
-    with col_b:
-        esgoto = st.number_input("Volume Esgoto Tratado (m³):", min_value=0.0)
-        residuos = st.number_input("Volume Resíduos Sólidos Coletados (kg):", min_value=0.0)
+# --- BLOCO 4 & 5: SOCIOCULTURAL E GOVERNANÇA ---
+with tabs[2]:
+    st.header("♿ Acessibilidade e Social")
+    # Score Automático (Bloco 4)
+    check_acess = st.multiselect("Itens de Acessibilidade presentes:", 
+                                 ["Física", "Visual", "Auditiva", "Cognitiva", "Digital", "Comunicacional", "Social"]) [cite: 779, 784]
+    score_acess = len(check_acess)
+    st.metric("Score de Acessibilidade", f"{score_acess}/7") [cite: 794]
 
-# --- SEÇÃO 4 & 5: SOCIOCULTURAL E GOVERNANÇA ---
-with st.expander("⚖️ Seções 4 e 5: Sociocultural e Governança (Anual)"):
-    st.write("**Acessibilidade e Participação**")
-    acessibilidade = st.multiselect("Tipos de Acessibilidade monitorados no destino:", 
-                                    ["Física", "Visual", "Auditiva", "Cognitiva", "Digital", "Comunicacional", "Social"])
-    comtur = st.radio("O COMTUR está ativo e paritário?", ("Sim", "Não"))
-    pddt = st.date_input("Data da última atualização do Plano Diretor (PDDT):")
+with tabs[3]:
+    st.header("🏛️ Governança")
+    comtur = st.checkbox("COMTUR Ativo e Paritário?") [cite: 860, 861]
+    pddt = st.checkbox("Plano Diretor (PDDT) Vigente?") [cite: 881, 883]
+    score_gov = (comtur + pddt) * 5
+    st.metric("Índice de Governança", f"{score_gov}/10")
 
-# --- FINALIZAÇÃO E LGPD ---
-st.markdown("---")
-st.warning("⚠️ **Conformidade LGPD:** Ao enviar, você confirma que os dados seguem a Lei nº 13.709/2018.")
-concordo = st.checkbox("Declaro que as informações são fidedignas e autorizo o uso para fins de inteligência turística.")
+# --- BLOCO 6: PESQUISA DE DEMANDA (PERFIL) ---
+with tabs[4]:
+    st.header("👤 Perfil do Turista (Demanda)")
+    with st.form("pesquisa_demanda"):
+        col_p1, col_p2 = st.columns(2)
+        with col_p1:
+            origem = st.text_input("Cidade de Origem (IBGE):")
+            renda = st.selectbox("Faixa de Renda:", ["Até 2 SM", "2 a 5 SM", "5 a 10 SM", "Acima de 10 SM"])
+            permanencia = st.number_input("Dias de Permanência:", min_value=1)
+        with col_p2:
+            gasto_total = st.number_input("Gasto Total na Viagem (R$):", min_value=0.0)
+            gasto_diario = gasto_total / permanencia if permanencia > 0 else 0
+            st.write(f"**Gasto Diário Calculado: R$ {gasto_diario:.2f}**")
+            satisfacao = st.slider("Satisfação Geral:", 1, 10, 8)
+        
+        enviar_pesquisa = st.form_submit_button("Registrar Pesquisa de Demanda")
 
-if st.button("ENVIAR DADOS PARA O OBSERVATÓRIO"):
-    if concordo:
-        # Aqui o código salvaria em um Google Sheets ou Banco de Dados
-        st.success(f"Dados da IGR {igr_nome} enviados com sucesso para o Professor Tide!")
-    else:
-        st.error("Você precisa aceitar os termos da LGPD para enviar.")
+# --- BLOCO 8 & 9: VIEWS ANALÍTICAS ---
+if st.button("Gerar Relatório de Performance (Views)"):
+    st.toast("Processando Views Analíticas...")
+    # Simulação de vw_ocupacao_mensal e vw_perfil_turista
+    data_view = {
+        "Mês": ["Jan", "Fev"],
+        "Ocupação Média (%)": [taxa_ocp, taxa_ocp-5],
+        "Gasto Médio (R$)": [gasto_diario, gasto_diario*1.1]
+    }
+    st.table(pd.DataFrame(data_view))
